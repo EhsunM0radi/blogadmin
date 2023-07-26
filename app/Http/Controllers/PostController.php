@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Carbon\Carbon;
 use App\Models\Post;
 use Illuminate\View\View;
@@ -66,27 +67,17 @@ class PostController extends Controller
         return view('post.view', compact('post', 'prev', 'next'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
+    public function byCategory(Category $category)
     {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Post $post)
-    {
-        //
-    }
+        $posts = Post::query()
+            ->join('category_post', 'posts.id', '=', 'category_post.post_id')
+            ->where('category_post.category_id', '=', $category->id)
+            ->where('active', '=', true)
+            ->whereDate('published_at', '<=', Carbon::now())
+            ->orderBy('published_at', 'desc')
+            ->paginate(10);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post)
-    {
-        //
+        return view('home', compact('posts'));
     }
 }
